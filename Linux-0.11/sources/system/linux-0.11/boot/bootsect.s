@@ -55,7 +55,7 @@ start:
 	sub	si,si			！ si为0，源地址：ds：si=0x07c0：0x0000
 	sub	di,di			！ di为0，源地址：es：di=0x9000：0x0000
 	rep					！ 重复执行，直到cx为0
-	movw				！ 移动一个字节。
+	movw				！ 移动一个字。
 	jmpi	go,INITSEG	！ 段间跳转。就是将cs的值更新为INITSEG，也就是0x9000
 ！ cpu已经跳转到0x9000的位置了
 go:	mov	ax,cs
