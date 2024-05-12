@@ -14,11 +14,11 @@
 #include <asm/segment.h>
 #include <asm/memory.h>
 
-#define MAJOR_NR 1
+#define MAJOR_NR 1	// 虚拟盘的主设备号
 #include "blk.h"
 
-char	*rd_start;
-int	rd_length = 0;
+char	*rd_start;	// 虚拟盘初始化位置
+int	rd_length = 0;	// 虚拟盘长度
 
 void do_rd_request(void)
 {
@@ -54,10 +54,13 @@ long rd_init(long mem_start, int length)
 	int	i;
 	char	*cp;
 
+	// 设备列表中，初始化信息
 	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST;
+
 	rd_start = (char *) mem_start;
 	rd_length = length;
 	cp = rd_start;
+	// 内存信息清0.
 	for (i=0; i < length; i++)
 		*cp++ = '\0';
 	return(length);

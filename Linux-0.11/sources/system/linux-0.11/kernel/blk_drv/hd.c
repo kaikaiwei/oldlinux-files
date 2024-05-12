@@ -67,10 +67,13 @@ __asm__("cld;rep;outsw"::"d" (port),"S" (buf),"c" (nr):"cx","si")
 extern void hd_interrupt(void);
 extern void rd_load(void);
 
-/* This may be used only once, enforced by 'static int callable' */
+/* This may be used only once, enforced by 'static int callable' 
+ * 该函数值调用一次。
+ * @param BIOS 是setup.s的时候取得硬盘信息。
+ */
 int sys_setup(void * BIOS)
 {
-	static int callable = 1;
+	static int callable = 1; // 1表示未调用，0表示已经调用过。
 	int i,drive;
 	unsigned char cmos_disks;
 	struct partition *p;

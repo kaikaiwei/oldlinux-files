@@ -22,6 +22,7 @@
 #define DAY (24*HOUR)
 #define YEAR (365*DAY)
 
+// 每个月多少秒
 /* interestingly, we assume leap-years */
 static int month[12] = {
 	0,
@@ -43,10 +44,12 @@ long kernel_mktime(struct tm * tm)
 	long res;
 	int year;
 
-	year = tm->tm_year - 70;
+	year = tm->tm_year - 70; // 1970-1-1，按照这个初始时间来算的。
 /* magic offsets (y+1) needed to get leapyears right.*/
 	res = YEAR*year + DAY*((year+1)/4);
 	res += month[tm->tm_mon];
+
+	// 瑞月的话，要减去一天
 /* and (y+2) here. If it wasn't a leap-year, we have to adjust */
 	if (tm->tm_mon>1 && ((year+2)%4))
 		res -= DAY;
