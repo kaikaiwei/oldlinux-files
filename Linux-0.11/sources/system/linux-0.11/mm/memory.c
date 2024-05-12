@@ -20,6 +20,14 @@
  * Also corrected some "invalidate()"s - I wasn't doing enough of them.
  */
 
+/**
+ *  实现了对主内存区内存的动态分配和收回操作。对于物理内存的管理，使用字节数组（mem_map）来表示主内存区中所有物理内存页的状态。
+ *  每个字节描述一个物理页的占用状态。0表示对应的物理内存空闲。当申请一页物理内存时，就将对应的字节的值增1.
+ *  
+ *  每个进程的线性地址中都是从nr*64MB的地址位置开始（nr是任务号），占用线性地址空间的范围是64MB。
+ *  其中最后部分的环境参数数据块最长位128KB， 其左面的起始时堆栈指针。在进程创建时，bss段的第一页被初始化为全0.
+ *  布局是这样的：代码段（nr*64MB开始），数据段，bss段， 。。。， （堆栈指针），参数（环境参数块，128KB）
+ */
 #include <signal.h>
 
 #include <asm/system.h>
@@ -28,14 +36,17 @@
 #include <linux/head.h>
 #include <linux/kernel.h>
 
+/** 推出进程的操作*/
 volatile void do_exit(long code);
 
+/** out of memory。 内存溢出。会调用do_exit函数，造成进程死亡*/
 static inline volatile void oom(void)
 {
 	printk("out of memory\n\r");
 	do_exit(SIGSEGV);
 }
 
+/** invalidate 宏， movl，高字节移动。将eax高16位移动到cr3中。表示*/
 #define invalidate() \
 __asm__("movl %%eax,%%cr3"::"a" (0))
 
@@ -49,10 +60,19 @@ __asm__("movl %%eax,%%cr3"::"a" (0))
 #define CODE_SPACE(addr) ((((addr)+4095)&~4095) < \
 current->start_code + current->end_code)
 
-static long HIGH_MEMORY = 0;
+static long HIGH_MEMORY = 0;	// 高端内存地址
 
+/* 
+ * 拷贝内存的宏操作
+ * cld 方向位。rep，循环。 执行指令movsl。
+ * S，来源地址
+ * D，目的地址
+ * c： 1024个
+ * 会修改cx，di，si。
+ */
 #define copy_page(from,to) \
 __asm__("cld ; rep ; movsl"::"S" (from),"D" (to),"c" (1024):"cx","di","si")
+
 
 static unsigned char mem_map [ PAGING_PAGES ] = {0,};
 
@@ -243,6 +263,7 @@ void un_wp_page(unsigned long * table_entry)
  * and decrementing the shared-page counter for the old page.
  *
  * If it's in code space we exit with a segment error.
+ * 处理写时复制。在共享页面的情况下。会取消对页面的共享。
  */
 void do_wp_page(unsigned long error_code,unsigned long address)
 {
@@ -362,6 +383,10 @@ static int share_page(unsigned long address)
 	return 0;
 }
 
+/** 
+ * 将需要的页面从块设备中读取到内存指定位置。用于处理缺页异常。
+ * 
+ */
 void do_no_page(unsigned long error_code,unsigned long address)
 {
 	int nr[4];
@@ -396,11 +421,17 @@ void do_no_page(unsigned long error_code,unsigned long address)
 	oom();
 }
 
+/** 
+ * 内存初始化函数。 
+ * @param start_mem 开始的内存地址
+ * @param end_mem 内存的结束地址。
+ */
 void mem_init(long start_mem, long end_mem)
 {
 	int i;
 
-	HIGH_MEMORY = end_mem;
+	HIGH_MEMORY = end_mem; // 高端内存为内存的结束地址。
+	// 对于每一个pages，标记为使用中。
 	for (i=0 ; i<PAGING_PAGES ; i++)
 		mem_map[i] = USED;
 	i = MAP_NR(start_mem);

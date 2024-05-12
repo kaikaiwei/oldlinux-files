@@ -7,6 +7,8 @@
 /*
  * page.s contains the low-level page-exception code.
  * the real work is done in mm.c
+ * 包含低级别的页面异常处理函数。 真正工作的事在mm.c中。
+ * 内存页异常中断处理过程 int 14的处理。 主要是缺页和页写保护的处理。
  */
 
 .globl _page_fault
