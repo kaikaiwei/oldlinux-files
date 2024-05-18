@@ -1,6 +1,7 @@
 #ifndef _BLK_H
 #define _BLK_H
 
+// 磁盘设备类型
 #define NR_BLK_DEV	7
 /*
  * NR_REQUEST is the number of entries in the request-queue.

@@ -18,14 +18,14 @@
  * The request-struct contains all necessary data
  * to load a nr of sectors into memory
  */
-struct request request[NR_REQUEST];
+struct request request[NR_REQUEST]; // NR_REQUEST 32， 定义在blk.h中。请求队列
 
 /*
- * used to wait on when there are no free requests
+ * used to wait on when there are no free requests  等待队列。
  */
 struct task_struct * wait_for_request = NULL;
 
-/* blk_dev_struct is:
+/* blk_dev_struct is:    磁盘设备类型
  *	do_request-address
  *	next-request
  */
@@ -39,6 +39,10 @@ struct blk_dev_struct blk_dev[NR_BLK_DEV] = {
 	{ NULL, NULL }		/* dev lp */
 };
 
+/**
+ * 锁定buffer。
+ * 就是在关闭中断的情况下。将buffer_head的b_lock置为1
+ */
 static inline void lock_buffer(struct buffer_head * bh)
 {
 	cli();
@@ -48,15 +52,20 @@ static inline void lock_buffer(struct buffer_head * bh)
 	sti();
 }
 
+/**
+ * 释放buffer。
+ * 就是在关闭中断的情况下。将buffer_head的b_lock置为0
+ */
 static inline void unlock_buffer(struct buffer_head * bh)
 {
 	if (!bh->b_lock)
 		printk("ll_rw_block.c: buffer not locked\n\r");
 	bh->b_lock = 0;
-	wake_up(&bh->b_wait);
+	wake_up(&bh->b_wait); // 唤醒等待的队列上的任务
 }
 
 /*
+ * 添加一个请求
  * add-request adds a request to the linked list.
  * It disables interrupts so that it can muck with the
  * request-lists in peace.
@@ -66,8 +75,8 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 	struct request * tmp;
 
 	req->next = NULL;
-	cli();
-	if (req->bh)
+	cli();	// 关闭中断
+	if (req->bh)			// 这表明
 		req->bh->b_dirt = 0;
 	if (!(tmp = dev->current_request)) {
 		dev->current_request = req;
@@ -85,6 +94,12 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 	sti();
 }
 
+/**
+ * 生成请求
+ * @param major 主设备号
+ * @param rw  读写。
+ * @param bh， buffer_head， 缓冲区头
+ */
 static void make_request(int major,int rw, struct buffer_head * bh)
 {
 	struct request * req;
@@ -154,6 +169,10 @@ void ll_rw_block(int rw, struct buffer_head * bh)
 	make_request(major,rw,bh);
 }
 
+/**
+ * 磁盘初始化
+ * 就是将request请求队列都给置空
+ */
 void blk_dev_init(void)
 {
 	int i;

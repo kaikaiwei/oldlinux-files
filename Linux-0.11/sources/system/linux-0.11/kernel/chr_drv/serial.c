@@ -34,12 +34,15 @@ static void init(int port)
 	(void)inb(port);	/* read data port to reset things (?) */
 }
 
+/**
+ *
+ */
 void rs_init(void)
 {
-	set_intr_gate(0x24,rs1_interrupt);
+	set_intr_gate(0x24,rs1_interrupt);	// 设置中断门函数
 	set_intr_gate(0x23,rs2_interrupt);
-	init(tty_table[1].read_q.data);
-	init(tty_table[2].read_q.data);
+	init(tty_table[1].read_q.data);		// 初始化第一个终端
+	init(tty_table[2].read_q.data);		// 初始化第二个终端
 	outb(inb_p(0x21)&0xE7,0x21);
 }
 

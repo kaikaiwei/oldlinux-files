@@ -102,10 +102,14 @@ struct tty_queue * table_list[]={
 	&tty_table[2].read_q, &tty_table[2].write_q
 	};
 
+/**
+ * 终端初始化
+ * 分别调用了rs_init和con_init
+ */
 void tty_init(void)
 {
-	rs_init();
-	con_init();
+	rs_init();	// kernel/serial.c
+	con_init(); // kernel/console.c
 }
 
 void tty_intr(struct tty_struct * tty, int mask)
@@ -344,6 +348,9 @@ void do_tty_interrupt(int tty)
 	copy_to_cooked(tty_table+tty);
 }
 
+/**
+ * 浪费表情，竟然是空的
+ */
 void chr_dev_init(void)
 {
 }
