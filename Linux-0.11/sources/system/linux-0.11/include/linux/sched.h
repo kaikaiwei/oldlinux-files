@@ -1,10 +1,14 @@
 #ifndef _SCHED_H
 #define _SCHED_H
 
+// 任务数量
 #define NR_TASKS 64
+// 频率
 #define HZ 100
 
+// 第一个任务
 #define FIRST_TASK task[0]
+// 最后一个任务
 #define LAST_TASK task[NR_TASKS-1]
 
 #include <linux/head.h>
@@ -16,27 +20,34 @@
 #error "Currently the close-on-exec-flags are in one word, max 32 files/proc"
 #endif
 
-#define TASK_RUNNING		0
-#define TASK_INTERRUPTIBLE	1
-#define TASK_UNINTERRUPTIBLE	2
-#define TASK_ZOMBIE		3
-#define TASK_STOPPED		4
+// 进程状态
+#define TASK_RUNNING		0		// 运行中
+#define TASK_INTERRUPTIBLE	1		// 可中断的睡眠中
+#define TASK_UNINTERRUPTIBLE	2	// 不可中断的睡眠中
+#define TASK_ZOMBIE		3			// 僵尸进程
+#define TASK_STOPPED		4		// 进程结束
 
+// 定义NULL 为空。后面应该修改为了nullptr
 #ifndef NULL
 #define NULL ((void *) 0)
 #endif
 
+// 拷贝页表
 extern int copy_page_tables(unsigned long from, unsigned long to, long size);
+// 释放页表
 extern int free_page_tables(unsigned long from, unsigned long size);
 
-extern void sched_init(void);
-extern void schedule(void);
-extern void trap_init(void);
-extern void panic(const char * str);
-extern int tty_write(unsigned minor,char * buf,int count);
+extern void sched_init(void);		// 调度初始化函数。 kernel/sched.c
+extern void schedule(void);			// 调度函数。 kernel/sched.c
+extern void trap_init(void);		// 陷阱门初始化函数。 kernel/traps.c
+extern void panic(const char * str);	// 系统慌张
+extern int tty_write(unsigned minor,char * buf,int count);	// 终端写入
 
-typedef int (*fn_ptr)();
+typedef int (*fn_ptr)();	// 一个执行函数
 
+/**
+ *
+ */
 struct i387_struct {
 	long	cwd;
 	long	swd;
@@ -109,6 +120,7 @@ struct task_struct {
 /*
  *  INIT_TASK is used to set up the first task table, touch at
  * your own risk!. Base=0, limit=0x9ffff (=640kB)
+ * 用于设置第一个任务的task table。 
  */
 #define INIT_TASK \
 /* state etc */	{ 0,15,15, \

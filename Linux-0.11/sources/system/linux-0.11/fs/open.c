@@ -189,18 +189,27 @@ int sys_creat(const char * pathname, int mode)
 	return sys_open(pathname, O_CREAT | O_TRUNC, mode);
 }
 
+/**
+ * 关闭指定fd的文件
+ * @param fd 文件标号
+ */
 int sys_close(unsigned int fd)
 {	
 	struct file * filp;
 
+	// 合法性校验
 	if (fd >= NR_OPEN)
 		return -EINVAL;
+
 	current->close_on_exec &= ~(1<<fd);
+	// 如果fd对应的文件不存在
 	if (!(filp = current->filp[fd]))
 		return -EINVAL;
-	current->filp[fd] = NULL;
-	if (filp->f_count == 0)
+	current->filp[fd] = NULL; // 置空操作
+
+	if (filp->f_count == 0)		// 如果文件打开计数为0，表明重复关闭
 		panic("Close: file count is 0");
+	// 减少文件打开计数。如果为0，返回0 
 	if (--filp->f_count)
 		return (0);
 	iput(filp->f_inode);
