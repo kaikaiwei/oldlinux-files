@@ -3,6 +3,7 @@
 
 #define TTY_BUF_SIZE 1024
 
+// posix1 定义的所有11个输入标志
 /* 0x54 is just a magic number to make these relatively uniqe ('T') */
 
 #define TCGETS		0x5401
@@ -40,14 +41,16 @@ struct winsize {
 	unsigned short ws_ypixel;
 };
 
+// 控制字符数组长度
 #define NCC 8
+
 struct termio {
-	unsigned short c_iflag;		/* input mode flags */
-	unsigned short c_oflag;		/* output mode flags */
-	unsigned short c_cflag;		/* control mode flags */
-	unsigned short c_lflag;		/* local mode flags */
-	unsigned char c_line;		/* line discipline */
-	unsigned char c_cc[NCC];	/* control characters */
+	unsigned short c_iflag;		/* input mode flags  输入模式标志*/
+	unsigned short c_oflag;		/* output mode flags  输出模式标志*/
+	unsigned short c_cflag;		/* control mode flags  控制模式标志*/
+	unsigned short c_lflag;		/* local mode flags  本地模式标志*/
+	unsigned char c_line;		/* line discipline  线路规程（速率）*/
+	unsigned char c_cc[NCC];	/* control characters 控制字符数组 */
 };
 
 #define NCCS 17
