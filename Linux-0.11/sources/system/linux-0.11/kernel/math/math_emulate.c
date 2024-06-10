@@ -43,11 +43,14 @@ void math_emulate(long edi, long esi, long ebp, long sys_call_ret,
 }
 
 /**
- *
+ * 协处理器出错处理函数。
+ * 中断处理程序调用的c函数，kernel/system.call
  */
 void math_error(void)
 {
+	// 协处理器指令。（以非等待形式）清除所有异常标志，忙标志和状态字位7.
 	__asm__("fnclex");
+	// 如果上个任务使用过协处理器，则向上个任务发送协处理器异常信号。
 	if (last_task_used_math)
 		last_task_used_math->signal |= 1<<(SIGFPE-1);
 }
