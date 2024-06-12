@@ -65,19 +65,22 @@ __asm__("incl %0\n\tandl $4095,%0"::"m" (head))
 
 typedef char buffer_block[BLOCK_SIZE];
 
+/**
+ * 缓冲区头指针
+ */
 struct buffer_head {
-	char * b_data;			/* pointer to data block (1024 bytes) */
+	char * b_data;			/* pointer to data block (1024 bytes) */ // 指向数据区
 	unsigned long b_blocknr;	/* block number */
-	unsigned short b_dev;		/* device (0 = free) */
+	unsigned short b_dev;		/* device (0 = free)  设备号 */
 	unsigned char b_uptodate;
-	unsigned char b_dirt;		/* 0-clean,1-dirty */
-	unsigned char b_count;		/* users using this block */
-	unsigned char b_lock;		/* 0 - ok, 1 -locked */
-	struct task_struct * b_wait;
-	struct buffer_head * b_prev;
-	struct buffer_head * b_next;
-	struct buffer_head * b_prev_free;
-	struct buffer_head * b_next_free;
+	unsigned char b_dirt;		/* 0-clean,1-dirty  脏标记*/
+	unsigned char b_count;		/* users using this block 使用计数*/
+	unsigned char b_lock;		/* 0 - ok, 1 -locked  锁标记 */
+	struct task_struct * b_wait;		// 等待队列
+	struct buffer_head * b_prev;		// 前一个
+	struct buffer_head * b_next;		// 后一个
+	struct buffer_head * b_prev_free;	// 前一个空闲
+	struct buffer_head * b_next_free;	// 后一个空闲
 };
 
 struct d_inode {
@@ -113,12 +116,15 @@ struct m_inode {
 	unsigned char i_update;
 };
 
+/**
+ * 文件数据结构
+ */
 struct file {
-	unsigned short f_mode;
-	unsigned short f_flags;
-	unsigned short f_count;
-	struct m_inode * f_inode;
-	off_t f_pos;
+	unsigned short f_mode;		// 文件操作模式，rw位
+	unsigned short f_flags;		// 文件打开和控制标记
+	unsigned short f_count;		// 对应文件句柄数
+	struct m_inode * f_inode;	// 指向对应的i节点
+	off_t f_pos;				// 文件偏移量
 };
 
 struct super_block {
