@@ -55,7 +55,9 @@ void buffer_init(long buffer_end);
 #define INODES_PER_BLOCK ((BLOCK_SIZE)/(sizeof (struct d_inode)))
 #define DIR_ENTRIES_PER_BLOCK ((BLOCK_SIZE)/(sizeof (struct dir_entry)))
 
+// 获取管道头指针
 #define PIPE_HEAD(inode) ((inode).i_zone[0])
+// 获取管道尾指针
 #define PIPE_TAIL(inode) ((inode).i_zone[1])
 #define PIPE_SIZE(inode) ((PIPE_HEAD(inode)-PIPE_TAIL(inode))&(PAGE_SIZE-1))
 #define PIPE_EMPTY(inode) (PIPE_HEAD(inode)==PIPE_TAIL(inode))
