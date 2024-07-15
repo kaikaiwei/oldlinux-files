@@ -4,50 +4,82 @@
 /* ok, this may be a joke, but I'm working on it */
 #define _POSIX_VERSION 198808L
 
+// 符号常数，符合IEEE表转1003.1实现的版本号，数一个证书制
 #define _POSIX_CHOWN_RESTRICTED	/* only root can do a chown (I think..) */
+// chown和fchown的使用受限于进程的权限
 #define _POSIX_NO_TRUNC		/* no pathname truncation (but see in kernel) */
+// 长与NAME_MAX的路径名将产生错误，但不会自动阶段
 #define _POSIX_VDISABLE '\0'	/* character to disable things like ^C */
 /*#define _POSIX_SAVED_IDS */	/* we'll get to this yet */
 /*#define _POSIX_JOB_CONTROL */	/* we aren't there quite yet. Soon hopefully */
 
+// 标准输入流句柄
 #define STDIN_FILENO	0
+// 标准输入流句柄
 #define STDOUT_FILENO	1
+// 标准错误流句柄
 #define STDERR_FILENO	2
 
+// 空指针
 #ifndef NULL
 #define NULL    ((void *)0)
 #endif
 
-/* access */
+/* access 文件访问 */
+// 检测文件是否存在
 #define F_OK	0
+// 检测是否可执行
 #define X_OK	1
+// 检测是否可写
 #define W_OK	2
+// 检测是否可读
 #define R_OK	4
 
 /* lseek */
+// 将文件读写指针设置为偏移值
 #define SEEK_SET	0
+// 将文件读写指针设置为当前值加上偏移值
 #define SEEK_CUR	1
+// 将文件读写指针设置为文件长度加伤偏移值
 #define SEEK_END	2
 
 /* _SC stands for System Configuration. We don't use them much */
+// _SC 表示系统配置
+// 最大变量数
 #define _SC_ARG_MAX		1
+// 子进程最大数
 #define _SC_CHILD_MAX		2
+// 每秒滴答数
 #define _SC_CLOCKS_PER_SEC	3
+// 最大组数
 #define _SC_NGROUPS_MAX		4
+// 最大打开文件数
 #define _SC_OPEN_MAX		5
+// 作业控制
 #define _SC_JOB_CONTROL		6
+// 保存的标识符
 #define _SC_SAVED_IDS		7
+// 版本
 #define _SC_VERSION		8
 
 /* more (possibly) configurable things - now pathnames */
+// 链接最大数量
 #define _PC_LINK_MAX		1
+// 最大常规文件数
 #define _PC_MAX_CANON		2
+// 最大输入长度
 #define _PC_MAX_INPUT		3
+// 名称最大长度
 #define _PC_NAME_MAX		4
+// 路径最大长度
 #define _PC_PATH_MAX		5
+// 管道缓冲大小
 #define _PC_PIPE_BUF		6
+// 文件名不截断
 #define _PC_NO_TRUNC		7
+// 
 #define _PC_VDISABLE		8
+// 改变宿主受限
 #define _PC_CHOWN_RESTRICTED	9
 
 #include <sys/stat.h>
@@ -55,9 +87,12 @@
 #include <sys/utsname.h>
 #include <utime.h>
 
+/**
+ * 以下时内核实现的系统调用符号常数，用作系统调用函数表中的索引值
+ */
 #ifdef __LIBRARY__
 
-#define __NR_setup	0	/* used only by init, to get system going */
+#define __NR_setup	0	/* used only by init, to get system going， 仅用于初始化以及启动系统 */
 #define __NR_exit	1
 #define __NR_fork	2
 #define __NR_read	3
@@ -130,19 +165,26 @@
 #define __NR_setreuid	70
 #define __NR_setregid	71
 
+/**
+ * 系统调用实现，没有参数。 
+ * name是系统调用的名称，与NR_组合成上面的系统函数调用的符号常量，从而来对系统调用表中的指针寻址
+ */
 #define _syscall0(type,name) \
 type name(void) \
 { \
 long __res; \
-__asm__ volatile ("int $0x80" \
-	: "=a" (__res) \
-	: "0" (__NR_##name)); \
-if (__res >= 0) \
+__asm__ volatile ("int $0x80" \		// 调用系统中断 0x80
+	: "=a" (__res) \				// 返回值， eax
+	: "0" (__NR_##name)); \			// 输入系统中断调用号， _NR_NAME
+if (__res >= 0) \					// 如果返回值大于>=0, 则直接返回该值
 	return (type) __res; \
 errno = -__res; \
 return -1; \
 }
 
+/**
+ * 有一个参数的系统调用宏函数
+ */
 #define _syscall1(type,name,atype,a) \
 type name(atype a) \
 { \
@@ -156,6 +198,9 @@ errno = -__res; \
 return -1; \
 }
 
+/**
+ * 有两个参数的系统调用
+ */
 #define _syscall2(type,name,atype,a,btype,b) \
 type name(atype a,btype b) \
 { \
@@ -169,6 +214,9 @@ errno = -__res; \
 return -1; \
 }
 
+/**
+ * 有三个参数的系统调用
+ */
 #define _syscall3(type,name,atype,a,btype,b,ctype,c) \
 type name(atype a,btype b,ctype c) \
 { \
@@ -184,8 +232,10 @@ return -1; \
 
 #endif /* __LIBRARY__ */
 
+// 出错号，全局的
 extern int errno;
 
+// 对应的哥哥系统调用的函数原型。 include/linux/sys.h
 int access(const char * filename, mode_t mode);
 int acct(const char * filename);
 int alarm(int sec);

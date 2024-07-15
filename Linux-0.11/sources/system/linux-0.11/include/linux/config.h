@@ -4,18 +4,24 @@
 /*
  * The root-device is no longer hard-coded. You can change the default
  * root-device by changing the line ROOT_DEV = XXX in boot/bootsect.s
+ * 根文件系统设备已不再是硬编码了。 通过修改boot/bootsect.s
  */
 
 /*
+ * 在这里定义键盘类型。
  * define your keyboard here -
  * KBD_FINNISH for Finnish keyboards
  * KBD_US for US-type
  * KBD_GR for German keyboards
  * KBD_FR for Frech keyboard
  */
+// 美式键盘
 /*#define KBD_US */
+// 德式键盘
 /*#define KBD_GR */
+// 法式键盘
 /*#define KBD_FR */
+// 芬兰键盘
 #define KBD_FINNISH
 
 /*
