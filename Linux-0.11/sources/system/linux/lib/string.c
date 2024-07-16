@@ -12,3 +12,5 @@
 #define inline
 #define __LIBRARY__
 #include <string.h>
+
+// 操作函数在.h中实现了，因此这里只包含了string.h

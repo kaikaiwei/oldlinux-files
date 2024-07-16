@@ -267,21 +267,28 @@ __asm__("movw %%dx,%0\n\t" \
 	  "d" (base) \
 	:"dx")
 
+// 设置位于地址addr处描述符中的段限长字段 段长是limit
+// %0: 地址
+// %1：地址addr偏移6处
+// %2: edx 段长值limit
 #define _set_limit(addr,limit) \
-__asm__("movw %%dx,%0\n\t" \
-	"rorl $16,%%edx\n\t" \
-	"movb %1,%%dh\n\t" \
-	"andb $0xf0,%%dh\n\t" \
-	"orb %%dh,%%dl\n\t" \
-	"movb %%dl,%1" \
+__asm__("movw %%dx,%0\n\t" \	// 段长limit低16位到addr
+	"rorl $16,%%edx\n\t" \		// edx中段长高4位->dl
+	"movb %1,%%dh\n\t" \		// 取原[addr +6] 字节->dh, 其中高4位是写标志
+	"andb $0xf0,%%dh\n\t" \		// 清dh的低4字节
+	"orb %%dh,%%dl\n\t" \		// 将原高4位标志和段长的高4位合成
+	"movb %%dl,%1" \			// 1字节， 并放回[addr +6]处
 	::"m" (*(addr)), \
 	  "m" (*((addr)+6)), \
 	  "d" (limit) \
 	:"dx")
 
+// 设置局部描述符表中ldt的基址字段
 #define set_base(ldt,base) _set_base( ((char *)&(ldt)) , base )
+// 设置局部描述符表中ldt描述符的段长字段
 #define set_limit(ldt,limit) _set_limit( ((char *)&(ldt)) , (limit-1)>>12 )
 
+// 从地址addr处描述符中取段机制。 功能与set_base正好相反
 #define _get_base(addr) ({\
 unsigned long __base; \
 __asm__("movb %3,%%dh\n\t" \
@@ -294,8 +301,12 @@ __asm__("movb %3,%%dh\n\t" \
 	 "m" (*((addr)+7))); \
 __base;})
 
+// 取局部描述符表中
 #define get_base(ldt) _get_base( ((char *)&(ldt)) )
 
+// 取段选择符segment的段长值
+// %0 存放段长值
+// %1 段选择符 segment
 #define get_limit(segment) ({ \
 unsigned long __limit; \
 __asm__("lsll %1,%0\n\tincl %0":"=r" (__limit):"r" (segment)); \

@@ -8,6 +8,12 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+/**
+ * 等待进程终止系统调用函数
+ * @param pid 等待被终止的进程id
+ * @param wait_stat 存放状态信息
+ * @param options  WNOHANG/WUNTRACED
+ */
 _syscall3(pid_t,waitpid,pid_t,pid,int *,wait_stat,int,options)
 
 pid_t wait(int * wait_stat)

@@ -7,4 +7,5 @@
 #define __LIBRARY__
 #include <unistd.h>
 
+// 创建会话并设置进程组号
 _syscall0(pid_t,setsid)

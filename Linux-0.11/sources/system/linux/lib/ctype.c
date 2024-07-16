@@ -6,7 +6,9 @@
 
 #include <ctype.h>
 
-char _ctmp;
+char _ctmp; // 临时变量符， 提供ctype.h中装欢字符宏函数使用
+// 字符特性数组（表）， 定义了哥哥字符对应的属性。
+// 用于判断是控制字符_C, 大写字符_U, 小写字符_L等所属类型
 unsigned char _ctype[] = {0x00,			/* EOF */
 _C,_C,_C,_C,_C,_C,_C,_C,			/* 0-7 */
 _C,_C|_S,_C|_S,_C|_S,_C|_S,_C|_S,_C,_C,		/* 8-15 */

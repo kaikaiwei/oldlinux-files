@@ -8,11 +8,16 @@
 #include <unistd.h>
 #include <stdarg.h>
 
+// 打开，并有可能创建一个文件
+// filename： 文件名称
+// flag： 文件打开标志
+// 返回：文件描述符，如果出错，则置出错号，并返回-1
 int open(const char * filename, int flag, ...)
 {
 	register int res;
 	va_list arg;
 
+	// 就是系统调用，
 	va_start(arg,flag);
 	__asm__("int $0x80"
 		:"=a" (res)
